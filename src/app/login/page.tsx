@@ -46,7 +46,7 @@ export default function LoginPage() {
       const { user } = await res.json();
       localStorage.setItem("userId", user.id);
       localStorage.setItem("userName", user.name);
-      router.push("/connect");
+      router.push("/create");
     } catch {
       setError("Something went wrong. Try again.");
     } finally {

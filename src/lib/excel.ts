@@ -34,8 +34,7 @@ const SHEETS = {
   GeneratedPosts: [
     "id",
     "user_id",
-    "input_what_happened",
-    "input_the_point",
+    "input_idea",
     "variant_1",
     "variant_2",
     "variant_3",

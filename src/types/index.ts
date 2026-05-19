@@ -37,8 +37,7 @@ export interface UserStyle {
 export interface GeneratedPost {
   id: string;
   user_id: string;
-  input_what_happened: string;
-  input_the_point: string;
+  input_idea: string;
   variant_1: string;
   variant_2: string;
   variant_3: string;
@@ -47,10 +46,7 @@ export interface GeneratedPost {
 
 export interface GenerateRequest {
   userId: string;
-  whatHappened: string;
-  thePoint: string;
-  vibe: string;
-  whatToAvoid: string;
+  idea: string;
 }
 
 export interface GenerateResponse {

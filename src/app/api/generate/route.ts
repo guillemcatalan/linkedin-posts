@@ -8,9 +8,9 @@ export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as GenerateRequest;
 
-    if (!body.whatHappened || !body.thePoint || !body.vibe) {
+    if (!body.idea?.trim()) {
       return NextResponse.json(
-        { error: "Missing required fields: whatHappened, thePoint, vibe" },
+        { error: "Missing required field: idea" },
         { status: 400 }
       );
     }
@@ -27,8 +27,7 @@ export async function POST(request: NextRequest) {
     await saveGeneratedPost({
       id: uuid(),
       user_id: body.userId,
-      input_what_happened: body.whatHappened,
-      input_the_point: body.thePoint,
+      input_idea: body.idea,
       variant_1: variants[0]?.text ?? "",
       variant_2: variants[1]?.text ?? "",
       variant_3: variants[2]?.text ?? "",

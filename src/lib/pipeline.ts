@@ -6,7 +6,10 @@ import {
   formatUserContextForPrompt,
 } from "./context";
 
-const anthropic = new Anthropic();
+const anthropic = new Anthropic({
+  baseURL: process.env.ANTHROPIC_BASE_URL,
+  apiKey: process.env.ANTHROPIC_API_KEY,
+});
 const MODEL = "claude-sonnet-4-20250514";
 
 const BANNED_PHRASES = [
@@ -73,17 +76,7 @@ export async function generatePosts(
 }
 
 function buildUserMessage(input: GenerateRequest): string {
-  const parts = [
-    `## What happened\n${input.whatHappened}`,
-    `## What's the point / takeaway\n${input.thePoint}`,
-    `## Vibe / tone I want\n${input.vibe}`,
-  ];
-
-  if (input.whatToAvoid.trim()) {
-    parts.push(`## What to avoid in this post\n${input.whatToAvoid}`);
-  }
-
-  return parts.join("\n\n");
+  return `## Post idea\n${input.idea}`;
 }
 
 function parseVariants(text: string): string[] {

@@ -9,10 +9,7 @@ interface PostFormProps {
 }
 
 export default function PostForm({ userId, onResults }: PostFormProps) {
-  const [whatHappened, setWhatHappened] = useState("");
-  const [thePoint, setThePoint] = useState("");
-  const [vibe, setVibe] = useState("");
-  const [whatToAvoid, setWhatToAvoid] = useState("");
+  const [idea, setIdea] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -25,7 +22,7 @@ export default function PostForm({ userId, onResults }: PostFormProps) {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, whatHappened, thePoint, vibe, whatToAvoid }),
+        body: JSON.stringify({ userId, idea }),
       });
 
       if (!res.ok) throw new Error("Generation failed");
@@ -43,55 +40,14 @@ export default function PostForm({ userId, onResults }: PostFormProps) {
     <form onSubmit={handleSubmit} className="flex flex-col gap-5 w-full">
       <div>
         <label className="block text-sm font-medium text-zinc-700 mb-1">
-          What happened?
+          What do you want to post about?
         </label>
         <textarea
-          placeholder="Tell the story — what happened, who was involved, what went wrong or right..."
-          value={whatHappened}
-          onChange={(e) => setWhatHappened(e.target.value)}
-          required
-          rows={4}
-          className="w-full px-4 py-3 border border-zinc-300 rounded-lg text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 resize-none"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-zinc-700 mb-1">
-          What&apos;s the point?
-        </label>
-        <textarea
-          placeholder="The takeaway, lesson, or insight you want people to walk away with"
-          value={thePoint}
-          onChange={(e) => setThePoint(e.target.value)}
+          placeholder="e.g. We just closed a deal with a 500-person company in Germany after 3 months of back and forth"
+          value={idea}
+          onChange={(e) => setIdea(e.target.value)}
           required
           rows={2}
-          className="w-full px-4 py-3 border border-zinc-300 rounded-lg text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 resize-none"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-zinc-700 mb-1">
-          Vibe
-        </label>
-        <textarea
-          placeholder="Funny, reflective, slightly provocative, casual, serious..."
-          value={vibe}
-          onChange={(e) => setVibe(e.target.value)}
-          required
-          rows={1}
-          className="w-full px-4 py-3 border border-zinc-300 rounded-lg text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 resize-none"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-zinc-700 mb-1">
-          What to avoid (optional)
-        </label>
-        <textarea
-          placeholder="Topics, phrases, angles you don't want..."
-          value={whatToAvoid}
-          onChange={(e) => setWhatToAvoid(e.target.value)}
-          rows={1}
           className="w-full px-4 py-3 border border-zinc-300 rounded-lg text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 resize-none"
         />
       </div>
