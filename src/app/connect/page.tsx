@@ -66,7 +66,7 @@ export default function ConnectPage() {
         </div>
 
         <div className="w-full p-5 bg-zinc-50 rounded-lg text-sm text-zinc-600 space-y-4">
-          <p className="font-medium text-zinc-900 text-base">How to download your LinkedIn data (2 min)</p>
+          <p className="font-medium text-zinc-900 text-base">How to download your LinkedIn data</p>
 
           <div className="space-y-3">
             <div className="flex gap-3">
@@ -81,43 +81,35 @@ export default function ConnectPage() {
                 >
                   linkedin.com/mypreferences/d/download-my-data
                 </a>
-                <p className="text-zinc-400 text-xs mt-0.5">(opens LinkedIn in a new tab)</p>
+                <p className="text-zinc-400 text-xs mt-0.5">(opens LinkedIn in a new tab — log in if needed)</p>
               </div>
             </div>
 
             <div className="flex gap-3">
               <span className="flex-shrink-0 w-6 h-6 bg-zinc-900 text-white rounded-full flex items-center justify-center text-xs font-medium">2</span>
               <div>
-                <p>You&apos;ll see two options. Select <strong>&quot;Want something in particular?&quot;</strong></p>
-                <p className="text-zinc-400 text-xs mt-0.5">Don&apos;t select &quot;Download larger data archive&quot; — that takes hours and includes stuff we don&apos;t need</p>
+                <p>Select the first option: <strong>&quot;Download larger data archive&quot;</strong></p>
+                <p className="text-zinc-400 text-xs mt-0.5">This includes your posts, comments, profile, and activity — everything we need</p>
               </div>
             </div>
 
             <div className="flex gap-3">
               <span className="flex-shrink-0 w-6 h-6 bg-zinc-900 text-white rounded-full flex items-center justify-center text-xs font-medium">3</span>
               <div>
-                <p>Check the boxes for <strong>&quot;Posts&quot;</strong> and <strong>&quot;Comments&quot;</strong></p>
-                <p className="text-zinc-400 text-xs mt-0.5">You can select others too, but we only use Posts and Comments</p>
+                <p>Click <strong>&quot;Request archive&quot;</strong></p>
               </div>
             </div>
 
             <div className="flex gap-3">
               <span className="flex-shrink-0 w-6 h-6 bg-zinc-900 text-white rounded-full flex items-center justify-center text-xs font-medium">4</span>
               <div>
-                <p>Click <strong>&quot;Request archive&quot;</strong></p>
+                <p>LinkedIn will send you an <strong>email</strong> when it&apos;s ready</p>
+                <p className="text-zinc-400 text-xs mt-0.5">Can take from 10 minutes up to a few hours. Look for &quot;Your LinkedIn data archive is ready&quot; in your inbox</p>
               </div>
             </div>
 
             <div className="flex gap-3">
               <span className="flex-shrink-0 w-6 h-6 bg-zinc-900 text-white rounded-full flex items-center justify-center text-xs font-medium">5</span>
-              <div>
-                <p>LinkedIn will send you an <strong>email</strong> when it&apos;s ready (usually 10-30 minutes)</p>
-                <p className="text-zinc-400 text-xs mt-0.5">Check your inbox for &quot;Your LinkedIn data archive is ready&quot;</p>
-              </div>
-            </div>
-
-            <div className="flex gap-3">
-              <span className="flex-shrink-0 w-6 h-6 bg-zinc-900 text-white rounded-full flex items-center justify-center text-xs font-medium">6</span>
               <div>
                 <p>Download the <strong>.zip file</strong> from the email and upload it below</p>
                 <p className="text-zinc-400 text-xs mt-0.5">Don&apos;t unzip it — upload the .zip file directly</p>
