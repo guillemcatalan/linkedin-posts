@@ -33,7 +33,12 @@ export default function LoginPage() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, linkedinUrl, department }),
+        body: JSON.stringify({
+          name,
+          email,
+          linkedinUrl: linkedinUrl.startsWith("http") ? linkedinUrl : `https://${linkedinUrl}`,
+          department,
+        }),
       });
 
       if (!res.ok) throw new Error("Login failed");
@@ -79,8 +84,8 @@ export default function LoginPage() {
             className="px-4 py-3 border border-zinc-300 rounded-lg text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900"
           />
           <input
-            type="url"
-            placeholder="LinkedIn profile URL"
+            type="text"
+            placeholder="LinkedIn profile URL (e.g. linkedin.com/in/your-name)"
             value={linkedinUrl}
             onChange={(e) => setLinkedinUrl(e.target.value)}
             required
