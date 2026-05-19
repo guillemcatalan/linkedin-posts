@@ -1,24 +1,37 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import PostForm from "@/components/PostForm";
 import PostResults from "@/components/PostResults";
 import type { PostVariant } from "@/types";
+import { Suspense } from "react";
 
-export default function CreatePage() {
+function CreateContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [userId, setUserId] = useState<string | null>(null);
   const [variants, setVariants] = useState<PostVariant[] | null>(null);
 
   useEffect(() => {
+    const paramUserId = searchParams.get("userId");
+    const paramUserName = searchParams.get("userName");
+
+    if (paramUserId) {
+      localStorage.setItem("userId", paramUserId);
+      if (paramUserName) localStorage.setItem("userName", paramUserName);
+      setUserId(paramUserId);
+      window.history.replaceState({}, "", "/create");
+      return;
+    }
+
     const stored = localStorage.getItem("userId");
     if (!stored) {
       router.replace("/login");
       return;
     }
     setUserId(stored);
-  }, [router]);
+  }, [router, searchParams]);
 
   if (!userId) return null;
 
@@ -40,5 +53,13 @@ export default function CreatePage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function CreatePage() {
+  return (
+    <Suspense>
+      <CreateContent />
+    </Suspense>
   );
 }
