@@ -76,6 +76,5 @@ export async function buildPipelineContext(
     benchmarkPosts,
     systemPrompt: prompts.systemPrompt,
     postStructure: prompts.postStructure,
-    hookEvaluator: prompts.hookEvaluator,
   };
 }

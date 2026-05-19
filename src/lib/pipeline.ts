@@ -52,10 +52,10 @@ export async function generatePosts(
   // Step 3: Build user message
   const userMessage = buildUserMessage(input);
 
-  // Step 4: Generate 3 variants (Claude call 1)
+  // Step 4: Generate 3 variants (single Claude call)
   const generation = await anthropic.messages.create({
     model: MODEL,
-    max_tokens: 2000,
+    max_tokens: 3000,
     system: fullSystemPrompt,
     messages: [{ role: "user", content: userMessage }],
   });
@@ -63,24 +63,8 @@ export async function generatePosts(
   const generatedText =
     generation.content[0].type === "text" ? generation.content[0].text : "";
 
-  // Step 5: Evaluate and fix hooks (Claude call 2)
-  const evaluation = await anthropic.messages.create({
-    model: MODEL,
-    max_tokens: 2000,
-    system: ctx.hookEvaluator,
-    messages: [
-      {
-        role: "user",
-        content: `Here are 3 LinkedIn post variants to evaluate. Check each hook and rewrite any that fail quality criteria.\n\n${generatedText}`,
-      },
-    ],
-  });
-
-  const finalText =
-    evaluation.content[0].type === "text" ? evaluation.content[0].text : "";
-
-  // Step 6: Parse and quality check (code, no LLM)
-  const rawVariants = parseVariants(finalText);
+  // Step 5: Parse and quality check (code, no LLM)
+  const rawVariants = parseVariants(generatedText);
   return rawVariants.map((text) => ({
     text,
     wordCount: countWords(text),
@@ -134,7 +118,7 @@ function checkQuality(text: string): QualityScore {
   const firstWord = text.trim().split(/\s/)[0];
 
   const hookStartsWithI = firstWord.toLowerCase() === "i";
-  const wordCountInRange = words >= 150 && words <= 220;
+  const wordCountInRange = words >= 150 && words <= 300;
 
   const hashtagMatches = text.match(/#\w+/g) || [];
   const hashtagCount = hashtagMatches.length;
@@ -146,7 +130,7 @@ function checkQuality(text: string): QualityScore {
   const passed =
     !hookStartsWithI &&
     wordCountInRange &&
-    hashtagCount <= 3 &&
+    hashtagCount <= 5 &&
     hasBannedPhrases.length === 0;
 
   return {

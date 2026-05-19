@@ -88,5 +88,4 @@ export interface PipelineContext {
   benchmarkPosts: BenchmarkPost[];
   systemPrompt: string;
   postStructure: string;
-  hookEvaluator: string;
 }
