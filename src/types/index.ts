@@ -3,6 +3,7 @@ export interface User {
   name: string;
   email: string;
   linkedin_url: string;
+  department: string;
   created_at: string;
 }
 

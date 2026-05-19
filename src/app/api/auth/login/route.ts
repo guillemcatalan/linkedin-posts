@@ -3,11 +3,11 @@ import { createUser, getUserByEmail } from "@/lib/excel";
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, email, linkedinUrl } = await request.json();
+    const { name, email, linkedinUrl, department } = await request.json();
 
-    if (!name || !email) {
+    if (!name || !email || !department) {
       return NextResponse.json(
-        { error: "Name and email are required" },
+        { error: "Name, email, and department are required" },
         { status: 400 }
       );
     }
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     let user = await getUserByEmail(email);
 
     if (!user) {
-      user = await createUser(name, email, linkedinUrl ?? "");
+      user = await createUser(name, email, linkedinUrl ?? "", department);
     }
 
     return NextResponse.json({ user });

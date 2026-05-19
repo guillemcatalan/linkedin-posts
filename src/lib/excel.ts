@@ -12,7 +12,7 @@ import type {
 const DB_PATH = join(process.cwd(), "data", "database.xlsx");
 
 const SHEETS = {
-  Users: ["id", "name", "email", "linkedin_url", "created_at"],
+  Users: ["id", "name", "email", "linkedin_url", "department", "created_at"],
   Profiles: [
     "user_id",
     "headline",
@@ -82,7 +82,8 @@ function sheetToRows<T>(sheet: ExcelJS.Worksheet): T[] {
 export async function createUser(
   name: string,
   email: string,
-  linkedinUrl: string
+  linkedinUrl: string,
+  department: string = ""
 ): Promise<User> {
   const workbook = await getWorkbook();
   const sheet = workbook.getWorksheet("Users")!;
@@ -91,6 +92,7 @@ export async function createUser(
     name,
     email,
     linkedin_url: linkedinUrl,
+    department,
     created_at: new Date().toISOString(),
   };
   sheet.addRow(user);
