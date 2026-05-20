@@ -42,28 +42,22 @@ export default function LoginPage() {
 
         const finalRole = isOtherDept ? customRole : role;
 
-        const { data, error: signUpError } = await supabase.auth.signUp({
+        const { error: signUpError } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            data: { name },
-          },
-        });
-
-        if (signUpError) throw signUpError;
-
-        if (data.user) {
-          await supabase
-            .from("users")
-            .update({
+            data: {
+              name,
               nickname,
               linkedin_url: finalLinkedinUrl,
               department,
               role: finalRole,
               role_description: roleDescription,
-            })
-            .eq("id", data.user.id);
-        }
+            },
+          },
+        });
+
+        if (signUpError) throw signUpError;
 
         router.push("/onboarding/connect");
       } else {
