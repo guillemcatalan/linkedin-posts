@@ -31,6 +31,10 @@ export default function LoginPage() {
 
     try {
       if (mode === "signup") {
+        if (!email.endsWith("@factorial.co")) {
+          throw new Error("Only @factorial.co emails are allowed.");
+        }
+
         let finalLinkedinUrl = linkedinUrl.trim();
         if (
           finalLinkedinUrl &&
@@ -61,6 +65,10 @@ export default function LoginPage() {
 
         router.push("/onboarding/connect");
       } else {
+        if (!email.endsWith("@factorial.co")) {
+          throw new Error("Only @factorial.co emails are allowed.");
+        }
+
         const { error: signInError } =
           await supabase.auth.signInWithPassword({ email, password });
         if (signInError) throw signInError;

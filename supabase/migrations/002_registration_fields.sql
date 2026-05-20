@@ -29,9 +29,14 @@ CREATE POLICY "manage own tokens"
   USING (auth.uid() = user_id);
 
 -- Update trigger to read all registration fields from auth metadata
+-- Only allow @factorial.co emails
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
+  IF new.email NOT LIKE '%@factorial.co' THEN
+    RAISE EXCEPTION 'Only @factorial.co emails are allowed';
+  END IF;
+
   INSERT INTO public.users (id, name, email, nickname, linkedin_url, department, role, role_description)
   VALUES (
     new.id,
