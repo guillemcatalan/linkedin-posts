@@ -90,9 +90,19 @@ Pattern: Bold claim → Explanation → Proof/Example
 - End with a takeaway that sticks. NOT a summary.
 - Then personal invitation to engage (not generic "What do you think?")
 
-## Hashtags: 3-5 at the very end. Mix niche and semi-broad.
+## Emojis
+Add 1-3 emojis maximum. Use them as visual anchors at the start of key paragraphs or as bullet markers.
+Never mid-sentence. Never decorative clusters. Never more than one per paragraph.
+Prefer: → ▸ 📌 💡 ⚡ 🎯 🔑. Avoid overused LinkedIn emojis: 🙏 ❤️ 🔥 💪 👏 🚀.
 
-## Word count: 150-300 words. Plain text only, no markdown. Line breaks between paragraphs. 0-2 emojis max.`;
+## Hashtags
+End every post with exactly 3-5 hashtags on a separate line.
+- 1-2 broad: #SaaS #Startups #B2B #HRTech #Tech
+- 1-2 niche to the specific topic
+- 1 company: #Factorial
+Never invent hashtags nobody searches for.
+
+## Word count: 100-150 words. Short, direct, high-engagement. Plain text only, no markdown. Line breaks between paragraphs.`;
 
 const FACTORIAL_CONTEXT = `# Factorial Context
 
@@ -130,7 +140,7 @@ serve(async (req: Request) => {
   }
 
   try {
-    const { idea, userId } = await req.json();
+    const { idea, userId, language = "English" } = await req.json();
 
     if (!idea || !userId) {
       return new Response(
@@ -233,6 +243,14 @@ serve(async (req: Request) => {
       systemParts.push(lines.join("\n"));
     }
 
+    // Language instruction
+    const langBlock = [`## Language: ${language}`, `Write the entire post in ${language}.`];
+    if (language !== "English") {
+      langBlock.push(`Use startup/tech vocabulary naturally — keep these terms in English even when writing in ${language}:`);
+      langBlock.push(`startup, scale-up, SaaS, B2B, B2C, MRR, ARR, churn, pipeline, onboarding, product-market fit, MVP, KPI, OKR, growth, burn rate, runway, seed, Series A/B/C, lead, prospect, deal, close, demo, pitch, deck, roadmap, sprint, ship, deploy, feature flag, A/B test, conversion, retention, NPS, CAC, LTV, upsell, cross-sell, stakeholder, alignment, ownership, bottom line, revenue, headcount`);
+    }
+    systemParts.push(langBlock.join("\n"));
+
     const fullSystemPrompt = systemParts.join("\n\n---\n\n");
 
     // Call Claude API via Azure Foundry
@@ -280,13 +298,13 @@ serve(async (req: Request) => {
         wordCount,
         qualityScore: {
           hookStartsWithI: firstWord === "i",
-          wordCountInRange: wordCount >= 150 && wordCount <= 300,
+          wordCountInRange: wordCount >= 100 && wordCount <= 150,
           hashtagCount: (text.match(/#\w+/g) || []).length,
           hasBannedPhrases: BANNED_PHRASES.filter((p) => lower.includes(p)),
           passed:
             firstWord !== "i" &&
-            wordCount >= 150 &&
-            wordCount <= 300 &&
+            wordCount >= 100 &&
+            wordCount <= 150 &&
             (text.match(/#\w+/g) || []).length <= 5 &&
             !BANNED_PHRASES.some((p) => lower.includes(p)),
         },

@@ -11,6 +11,7 @@ interface PostFormProps {
 
 export default function PostForm({ userId, onResults }: PostFormProps) {
   const [idea, setIdea] = useState("");
+  const [language, setLanguage] = useState("English");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -22,7 +23,7 @@ export default function PostForm({ userId, onResults }: PostFormProps) {
     try {
       const { data, error: fnError } = await supabase.functions.invoke(
         "generate",
-        { body: { idea, userId } }
+        { body: { idea, userId, language } }
       );
 
       if (fnError) throw fnError;
@@ -50,6 +51,25 @@ export default function PostForm({ userId, onResults }: PostFormProps) {
           rows={3}
           className="w-full px-4 py-3 glass rounded-xl text-fg placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 resize-none transition-all duration-150 ease-out"
         />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-fg mb-2">
+          Language
+        </label>
+        <select
+          value={language}
+          onChange={(e) => setLanguage(e.target.value)}
+          className="w-full px-4 py-3 glass rounded-xl text-fg focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 transition-all duration-150 ease-out"
+        >
+          <option value="English">English (startup)</option>
+          <option value="Español">Español</option>
+          <option value="Català">Català</option>
+          <option value="Deutsch">Deutsch</option>
+          <option value="Français">Français</option>
+          <option value="Português">Português</option>
+          <option value="Italiano">Italiano</option>
+        </select>
       </div>
 
       {error && <p className="text-red-400 text-sm">{error}</p>}
