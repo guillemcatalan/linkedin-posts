@@ -7,6 +7,12 @@ You are a ghostwriter. You write LinkedIn posts for employees at Factorial — a
 
 The posts must sound like a real person wrote them. Not a brand. Not an AI. A specific human sharing something from their work.
 
+## Priority hierarchy (non-negotiable)
+
+1. **THE USER'S IDEA** — this IS the post topic. Everything revolves around it.
+2. **Post Structure** — the format bible. Every rule is mandatory.
+3. **Personal context** — ONLY to calibrate voice and perspective. Never drives the topic.
+
 ## What you do
 
 The user gives you a short idea — sometimes just one sentence. That's all you need. You take that idea and turn it into **3 distinct LinkedIn post variants**. Never ask for more information. Never ask clarifying questions. Work with what you have and fill in the gaps with plausible, specific details that make the post feel real.
@@ -163,67 +169,68 @@ serve(async (req: Request) => {
     const systemParts = [SYSTEM_PROMPT, POST_STRUCTURE, FACTORIAL_CONTEXT];
 
     if (user) {
-      const sections: string[] = [
-        `# Current User`,
-        `Name: ${user.name}`,
-        user.nickname ? `Nickname: ${user.nickname}` : null,
-        `Department: ${user.department}`,
-        user.role ? `Role: ${user.role}` : null,
-        user.role_description ? `Daily work: ${user.role_description}` : null,
-      ].filter(Boolean) as string[];
+      const lines: string[] = [];
+      lines.push(`## Author voice (background reference — do NOT use as post content)`);
+      lines.push(``);
 
-      if (profile) {
-        if (profile.headline) sections.push(`LinkedIn headline: ${profile.headline}`);
-        if (profile.about) sections.push(`About: ${profile.about}`);
-        if (profile.location) sections.push(`Location: ${profile.location}`);
-        if (profile.languages) sections.push(`Languages: ${profile.languages}`);
-      }
+      // Core identity line
+      const locationPart = profile?.location ? `, ${profile.location}` : "";
+      lines.push(`${user.name} works in ${user.department} at Factorial (B2B HR SaaS${locationPart}).`);
 
+      // Career summary — compact one-liner
       if (positions?.length) {
-        sections.push(``, `## Career trajectory`);
-        for (const p of positions) {
-          const period = p.is_current ? `${p.started_on} — present` : `${p.started_on} — ${p.finished_on}`;
-          sections.push(`- **${p.title}** at ${p.company} (${period})${p.description ? `: ${p.description}` : ""}`);
-        }
+        const current = positions.find((p: { is_current: boolean }) => p.is_current);
+        const past = positions.filter((p: { is_current: boolean }) => !p.is_current).slice(0, 2);
+        const parts: string[] = [];
+        if (current) parts.push(`${current.title} at ${current.company} (current)`);
+        for (const p of past) parts.push(`${p.title} at ${p.company}`);
+        lines.push(`Background: ${parts.join(", ")}.`);
+      } else if (user.role) {
+        lines.push(`Role: ${user.role}.`);
       }
 
+      // Education — one line
       if (education?.length) {
-        sections.push(``, `## Education`);
-        for (const e of education) {
-          const degree = [e.degree, e.field_of_study].filter(Boolean).join(" in ");
-          sections.push(`- ${degree ? `${degree}, ` : ""}${e.school}${e.finished_on ? ` (${e.finished_on})` : ""}`);
-        }
+        const eduParts = education.slice(0, 2).map((e: { degree: string; field_of_study: string; school: string }) => {
+          const deg = [e.degree, e.field_of_study].filter(Boolean).join(" in ");
+          return deg ? `${deg} at ${e.school}` : e.school;
+        });
+        lines.push(`Education: ${eduParts.join("; ")}.`);
       }
 
-      if (certifications?.length) {
-        sections.push(``, `## Certifications`);
-        for (const c of certifications) {
-          sections.push(`- ${c.name}${c.authority ? ` — ${c.authority}` : ""}`);
-        }
-      }
-
-      if (projects?.length) {
-        sections.push(``, `## Projects`);
-        for (const p of projects) {
-          sections.push(`- **${p.title}**${p.description ? `: ${p.description}` : ""}`);
-        }
-      }
-
+      // Skills — one line
       if (style?.common_topics) {
-        sections.push(``, `## Skills & topics: ${style.common_topics}`);
+        const topSkills = style.common_topics.split(", ").slice(0, 8).join(", ");
+        lines.push(`Skills: ${topSkills}.`);
       }
 
+      // Languages — one line
+      if (profile?.languages) {
+        lines.push(`Languages: ${profile.languages}.`);
+      }
+
+      // Daily work — one line
+      if (user.role_description) {
+        const desc = user.role_description.length > 200
+          ? user.role_description.slice(0, 200) + "…"
+          : user.role_description;
+        lines.push(`Daily focus: ${desc}`);
+      }
+
+      lines.push(``);
+      lines.push(`This background helps you write in their voice. Do NOT make the post about their resume or credentials. The post is about the IDEA — this context only informs HOW they'd tell it.`);
+
+      // Past posts — style reference only, very compact
       if (pastPosts?.length) {
-        sections.push(``, `## Writing style reference (past LinkedIn posts by this person)`);
-        for (const p of pastPosts) {
-          const trimmed = p.post_text.length > 500 ? p.post_text.slice(0, 500) + "…" : p.post_text;
-          sections.push(`---`, trimmed);
+        lines.push(``);
+        lines.push(`## Writing style samples (tone reference ONLY — never copy content)`);
+        for (const p of pastPosts.slice(0, 3)) {
+          const trimmed = p.post_text.length > 300 ? p.post_text.slice(0, 300) + "…" : p.post_text;
+          lines.push(`> ${trimmed}`);
         }
-        sections.push(`---`, ``, `Match this person's tone, vocabulary, and rhythm. Do not copy these posts — use them as style reference only.`);
       }
 
-      sections.push(``, `Write from this person's perspective, department voice, and daily reality.`);
-      systemParts.push(sections.join("\n"));
+      systemParts.push(lines.join("\n"));
     }
 
     const fullSystemPrompt = systemParts.join("\n\n---\n\n");
@@ -243,7 +250,7 @@ serve(async (req: Request) => {
         model: "claude-opus-4-6",
         max_tokens: 3000,
         system: fullSystemPrompt,
-        messages: [{ role: "user", content: `## Post idea\n${idea}` }],
+        messages: [{ role: "user", content: `Write a LinkedIn post about this specific idea. The idea is the ONLY topic:\n\n${idea}` }],
       }),
     });
 
