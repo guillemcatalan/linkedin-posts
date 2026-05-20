@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 interface AuthUser {
@@ -15,6 +16,7 @@ interface AuthUser {
 }
 
 export function useAuth() {
+  const router = useRouter();
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -82,8 +84,8 @@ export function useAuth() {
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
     setUser(null);
-    window.location.href = "/login";
-  }, []);
+    router.push("/login");
+  }, [router]);
 
   return { user, loading, signOut };
 }

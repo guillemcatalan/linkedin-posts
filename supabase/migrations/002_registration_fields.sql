@@ -27,3 +27,22 @@ ALTER TABLE public.linkedin_tokens ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "manage own tokens"
   ON public.linkedin_tokens FOR ALL
   USING (auth.uid() = user_id);
+
+-- Update trigger to read all registration fields from auth metadata
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger AS $$
+BEGIN
+  INSERT INTO public.users (id, name, email, nickname, linkedin_url, department, role, role_description)
+  VALUES (
+    new.id,
+    coalesce(new.raw_user_meta_data->>'name', ''),
+    new.email,
+    coalesce(new.raw_user_meta_data->>'nickname', ''),
+    coalesce(new.raw_user_meta_data->>'linkedin_url', ''),
+    coalesce(new.raw_user_meta_data->>'department', ''),
+    coalesce(new.raw_user_meta_data->>'role', ''),
+    coalesce(new.raw_user_meta_data->>'role_description', '')
+  );
+  RETURN new;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
