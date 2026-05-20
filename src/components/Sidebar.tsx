@@ -63,9 +63,11 @@ export default function Sidebar() {
       {user && (
         <div className="px-3 pb-5 space-y-2">
           <div className="px-3 py-2">
-            <p className="text-sm font-medium text-fg truncate">{user.name}</p>
+            <p className="text-sm font-medium text-fg truncate">
+              {user.nickname || user.name}
+            </p>
             <p className="text-xs text-text-secondary truncate">
-              {user.department}
+              {user.role || user.department}
             </p>
           </div>
           <button

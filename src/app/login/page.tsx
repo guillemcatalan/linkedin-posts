@@ -3,29 +3,26 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-
-const DEPARTMENTS = [
-  "Partners",
-  "Sales",
-  "Engineering",
-  "Product",
-  "Marketing",
-  "People / HR",
-  "Finance / Operations",
-  "Customer Success",
-  "Other",
-];
+import { DEPARTMENTS, ROLES_BY_DEPARTMENT } from "@/lib/departments";
+import type { Department } from "@/lib/departments";
 
 export default function LoginPage() {
   const router = useRouter();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [name, setName] = useState("");
+  const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [linkedinUrl, setLinkedinUrl] = useState("");
-  const [department, setDepartment] = useState("");
+  const [department, setDepartment] = useState<Department | "">("");
+  const [role, setRole] = useState("");
+  const [customRole, setCustomRole] = useState("");
+  const [roleDescription, setRoleDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const roles = department ? ROLES_BY_DEPARTMENT[department] : [];
+  const isOtherDept = department === "Other";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -34,6 +31,17 @@ export default function LoginPage() {
 
     try {
       if (mode === "signup") {
+        let finalLinkedinUrl = linkedinUrl.trim();
+        if (
+          finalLinkedinUrl &&
+          !finalLinkedinUrl.startsWith("http://") &&
+          !finalLinkedinUrl.startsWith("https://")
+        ) {
+          finalLinkedinUrl = `https://${finalLinkedinUrl}`;
+        }
+
+        const finalRole = isOtherDept ? customRole : role;
+
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
@@ -47,19 +55,23 @@ export default function LoginPage() {
         if (data.user) {
           await supabase
             .from("users")
-            .update({ linkedin_url: linkedinUrl, department })
+            .update({
+              nickname,
+              linkedin_url: finalLinkedinUrl,
+              department,
+              role: finalRole,
+              role_description: roleDescription,
+            })
             .eq("id", data.user.id);
         }
+
+        router.push("/onboarding/connect");
       } else {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
+        const { error: signInError } =
+          await supabase.auth.signInWithPassword({ email, password });
         if (signInError) throw signInError;
+        router.push("/");
       }
-
-      router.push("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
@@ -71,7 +83,7 @@ export default function LoginPage() {
     "w-full px-4 py-3 bg-surface border border-border rounded-lg text-fg placeholder:text-[#555] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 transition-colors";
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6">
+    <div className="min-h-screen flex items-center justify-center px-6 py-12">
       <div className="flex flex-col items-center gap-8 w-full max-w-sm">
         <div className="text-center">
           <h1 className="text-3xl font-semibold text-fg tracking-tight">
@@ -84,17 +96,28 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3.5 w-full">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3 w-full">
           {mode === "signup" && (
-            <input
-              type="text"
-              placeholder="Full name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              className={inputClass}
-            />
+            <>
+              <input
+                type="text"
+                placeholder="Full name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className={inputClass}
+              />
+              <input
+                type="text"
+                placeholder="Nickname (how people call you)"
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+                required
+                className={inputClass}
+              />
+            </>
           )}
+
           <input
             type="email"
             placeholder="Email"
@@ -112,6 +135,7 @@ export default function LoginPage() {
             minLength={6}
             className={inputClass}
           />
+
           {mode === "signup" && (
             <>
               <input
@@ -119,16 +143,22 @@ export default function LoginPage() {
                 placeholder="LinkedIn profile URL"
                 value={linkedinUrl}
                 onChange={(e) => setLinkedinUrl(e.target.value)}
+                required
                 className={inputClass}
               />
+
               <select
                 value={department}
-                onChange={(e) => setDepartment(e.target.value)}
+                onChange={(e) => {
+                  setDepartment(e.target.value as Department);
+                  setRole("");
+                  setCustomRole("");
+                }}
                 required
                 className={`${inputClass} ${!department ? "text-[#555]" : ""}`}
               >
                 <option value="" disabled>
-                  Select your department
+                  Department
                 </option>
                 {DEPARTMENTS.map((dept) => (
                   <option key={dept} value={dept}>
@@ -136,6 +166,45 @@ export default function LoginPage() {
                   </option>
                 ))}
               </select>
+
+              {department && !isOtherDept && roles.length > 0 && (
+                <select
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  required
+                  className={`${inputClass} ${!role ? "text-[#555]" : ""}`}
+                >
+                  <option value="" disabled>
+                    Your role
+                  </option>
+                  {roles.map((r) => (
+                    <option key={r} value={r}>
+                      {r}
+                    </option>
+                  ))}
+                  <option value="__other">Other (type below)</option>
+                </select>
+              )}
+
+              {(isOtherDept || role === "__other") && (
+                <input
+                  type="text"
+                  placeholder="Your role title"
+                  value={customRole}
+                  onChange={(e) => setCustomRole(e.target.value)}
+                  required
+                  className={inputClass}
+                />
+              )}
+
+              <textarea
+                placeholder="Describe what you do day-to-day (this helps us write posts that sound like you)"
+                value={roleDescription}
+                onChange={(e) => setRoleDescription(e.target.value)}
+                required
+                rows={3}
+                className={`${inputClass} resize-none`}
+              />
             </>
           )}
 

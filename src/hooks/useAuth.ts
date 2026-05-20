@@ -6,8 +6,11 @@ import { supabase } from "@/lib/supabase";
 interface AuthUser {
   id: string;
   name: string;
+  nickname: string;
   email: string;
   department: string;
+  role: string;
+  role_description: string;
   linkedin_url: string;
 }
 
@@ -32,8 +35,11 @@ export function useAuth() {
           setUser({
             id: data.id,
             name: data.name,
+            nickname: data.nickname ?? "",
             email: data.email,
             department: data.department ?? "",
+            role: data.role ?? "",
+            role_description: data.role_description ?? "",
             linkedin_url: data.linkedin_url ?? "",
           });
         }
@@ -57,8 +63,11 @@ export function useAuth() {
           setUser({
             id: data.id,
             name: data.name,
+            nickname: data.nickname ?? "",
             email: data.email,
             department: data.department ?? "",
+            role: data.role ?? "",
+            role_description: data.role_description ?? "",
             linkedin_url: data.linkedin_url ?? "",
           });
         }

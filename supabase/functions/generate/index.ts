@@ -141,7 +141,7 @@ serve(async (req: Request) => {
 
     const { data: user } = await supabaseAdmin
       .from("users")
-      .select("name, department")
+      .select("name, nickname, department, role, role_description")
       .eq("id", userId)
       .single();
 
@@ -149,9 +149,19 @@ serve(async (req: Request) => {
     const systemParts = [SYSTEM_PROMPT, POST_STRUCTURE, FACTORIAL_CONTEXT];
 
     if (user) {
-      systemParts.push(
-        `# Current User\nName: ${user.name}\nDepartment: ${user.department}\n\nWrite from this person's perspective and department voice.`
-      );
+      const userContext = [
+        `# Current User`,
+        `Name: ${user.name}`,
+        user.nickname ? `Nickname: ${user.nickname}` : null,
+        `Department: ${user.department}`,
+        user.role ? `Role: ${user.role}` : null,
+        user.role_description ? `Daily work: ${user.role_description}` : null,
+        ``,
+        `Write from this person's perspective, department voice, and daily reality.`,
+      ]
+        .filter(Boolean)
+        .join("\n");
+      systemParts.push(userContext);
     }
 
     const fullSystemPrompt = systemParts.join("\n\n---\n\n");

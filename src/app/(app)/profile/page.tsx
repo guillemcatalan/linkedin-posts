@@ -3,34 +3,57 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/lib/supabase";
-import { Upload } from "lucide-react";
-
-const DEPARTMENTS = [
-  "Partners",
-  "Sales",
-  "Engineering",
-  "Product",
-  "Marketing",
-  "People / HR",
-  "Finance / Operations",
-  "Customer Success",
-  "Other",
-];
+import { DEPARTMENTS, ROLES_BY_DEPARTMENT } from "@/lib/departments";
+import type { Department } from "@/lib/departments";
+import { Upload, CheckCircle } from "lucide-react";
+import { getLinkedInAuthUrl } from "@/lib/linkedin-oauth";
 
 export default function ProfilePage() {
   const { user, signOut } = useAuth();
   const [name, setName] = useState("");
+  const [nickname, setNickname] = useState("");
   const [linkedinUrl, setLinkedinUrl] = useState("");
-  const [department, setDepartment] = useState("");
+  const [department, setDepartment] = useState<Department | "">("");
+  const [role, setRole] = useState("");
+  const [customRole, setCustomRole] = useState("");
+  const [roleDescription, setRoleDescription] = useState("");
   const [saved, setSaved] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [importResult, setImportResult] = useState<string | null>(null);
+  const [linkedinConnected, setLinkedinConnected] = useState(false);
+
+  const roles = department ? ROLES_BY_DEPARTMENT[department] : [];
+  const isOtherDept = department === "Other";
+  const isCustomRole = isOtherDept || (role === "__other");
 
   useEffect(() => {
     if (user) {
       setName(user.name);
+      setNickname(user.nickname);
       setLinkedinUrl(user.linkedin_url);
-      setDepartment(user.department);
+      setDepartment((user.department as Department) || "");
+      setRoleDescription(user.role_description);
+
+      if (user.department && user.department !== "Other") {
+        const deptRoles = ROLES_BY_DEPARTMENT[user.department as Department] ?? [];
+        if (deptRoles.includes(user.role)) {
+          setRole(user.role);
+        } else if (user.role) {
+          setRole("__other");
+          setCustomRole(user.role);
+        }
+      } else if (user.role) {
+        setCustomRole(user.role);
+      }
+
+      supabase
+        .from("linkedin_tokens")
+        .select("user_id")
+        .eq("user_id", user.id)
+        .single()
+        .then(({ data }) => {
+          if (data) setLinkedinConnected(true);
+        });
     }
   }, [user]);
 
@@ -38,13 +61,27 @@ export default function ProfilePage() {
     e.preventDefault();
     if (!user) return;
 
+    const finalRole = isCustomRole ? customRole : role;
+
     await supabase
       .from("users")
-      .update({ name, linkedin_url: linkedinUrl, department })
+      .update({
+        name,
+        nickname,
+        linkedin_url: linkedinUrl,
+        department,
+        role: finalRole,
+        role_description: roleDescription,
+      })
       .eq("id", user.id);
 
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
+  }
+
+  function handleConnectLinkedIn() {
+    if (!user) return;
+    window.location.href = getLinkedInAuthUrl(user.id);
   }
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -82,8 +119,13 @@ export default function ProfilePage() {
             };
           })
           .filter(
-            (r): r is { user_id: string; post_text: string; post_date: string | null } =>
-              r !== null
+            (
+              r
+            ): r is {
+              user_id: string;
+              post_text: string;
+              post_date: string | null;
+            } => r !== null
           );
 
         if (inserts.length > 0) {
@@ -117,12 +159,24 @@ export default function ProfilePage() {
       <form onSubmit={handleSave} className="space-y-4 mb-10">
         <div>
           <label className="block text-sm font-medium text-fg mb-1.5">
-            Name
+            Full name
           </label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            className={inputClass}
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-fg mb-1.5">
+            Nickname
+          </label>
+          <input
+            type="text"
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+            placeholder="How people call you"
             className={inputClass}
           />
         </div>
@@ -144,7 +198,11 @@ export default function ProfilePage() {
           </label>
           <select
             value={department}
-            onChange={(e) => setDepartment(e.target.value)}
+            onChange={(e) => {
+              setDepartment(e.target.value as Department);
+              setRole("");
+              setCustomRole("");
+            }}
             className={inputClass}
           >
             <option value="" disabled>
@@ -157,6 +215,58 @@ export default function ProfilePage() {
             ))}
           </select>
         </div>
+
+        {department && !isOtherDept && roles.length > 0 && (
+          <div>
+            <label className="block text-sm font-medium text-fg mb-1.5">
+              Role
+            </label>
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className={inputClass}
+            >
+              <option value="" disabled>
+                Select role
+              </option>
+              {roles.map((r) => (
+                <option key={r} value={r}>
+                  {r}
+                </option>
+              ))}
+              <option value="__other">Other (type below)</option>
+            </select>
+          </div>
+        )}
+
+        {isCustomRole && (
+          <div>
+            <label className="block text-sm font-medium text-fg mb-1.5">
+              Role title
+            </label>
+            <input
+              type="text"
+              value={customRole}
+              onChange={(e) => setCustomRole(e.target.value)}
+              placeholder="Your role title"
+              className={inputClass}
+            />
+          </div>
+        )}
+
+        <div>
+          <label className="block text-sm font-medium text-fg mb-1.5">
+            What you do day-to-day
+          </label>
+          <textarea
+            value={roleDescription}
+            onChange={(e) => setRoleDescription(e.target.value)}
+            placeholder="Describe your daily work — this helps generate posts that sound like you"
+            rows={3}
+            className={`${inputClass} resize-none`}
+          />
+        </div>
+
         <button
           type="submit"
           className="px-6 py-2.5 bg-accent text-bg rounded-full font-medium hover:bg-accent-hover transition-colors text-sm"
@@ -165,6 +275,36 @@ export default function ProfilePage() {
         </button>
       </form>
 
+      {/* LinkedIn connection */}
+      <div className="border-t border-border pt-8 mb-8">
+        <h2 className="text-lg font-medium text-fg mb-2">LinkedIn connection</h2>
+        {linkedinConnected ? (
+          <div className="flex items-center gap-2 bg-green-400/10 border border-green-400/20 rounded-xl px-4 py-3">
+            <CheckCircle size={16} className="text-green-400 shrink-0" />
+            <p className="text-sm text-green-400">
+              LinkedIn connected — we can publish directly to your profile.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-sm text-text-secondary">
+              Connect your LinkedIn account to publish posts directly from the
+              app.
+            </p>
+            <button
+              onClick={handleConnectLinkedIn}
+              className="flex items-center gap-2 px-5 py-2.5 bg-[#0A66C2] text-white rounded-full text-sm font-medium hover:bg-[#004182] transition-colors"
+            >
+              <svg width={16} height={16} viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+              </svg>
+              Connect with LinkedIn
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Writing style / ZIP */}
       <div className="border-t border-border pt-8 space-y-5">
         <div>
           <h2 className="text-lg font-medium text-fg">Your writing style</h2>
