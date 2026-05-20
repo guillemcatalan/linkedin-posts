@@ -13,9 +13,9 @@ export default function OnboardingProgress({ current }: { current: number }) {
           <div key={label} className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               <div
-                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium transition-colors ${
+                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium transition-all duration-150 ease-out ${
                   done
-                    ? "bg-accent text-bg"
+                    ? "bg-accent text-white"
                     : active
                       ? "border-2 border-accent text-accent"
                       : "border border-border text-text-secondary"

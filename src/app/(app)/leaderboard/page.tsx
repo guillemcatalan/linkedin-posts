@@ -45,7 +45,7 @@ export default function LeaderboardPage() {
   return (
     <div className="max-w-2xl mx-auto px-6 py-10">
       <div className="mb-10">
-        <h1 className="text-2xl font-semibold text-fg tracking-tight">
+        <h1 className="text-3xl font-display font-semibold text-fg tracking-tight">
           Leaderboard
         </h1>
         <p className="mt-1 text-sm text-text-secondary">

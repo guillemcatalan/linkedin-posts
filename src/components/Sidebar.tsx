@@ -27,15 +27,14 @@ export default function Sidebar() {
   const { user, signOut } = useAuth();
 
   return (
-    <aside className="w-60 shrink-0 h-screen sticky top-0 flex flex-col border-r border-border bg-surface">
+    <aside className="w-60 shrink-0 h-screen sticky top-0 flex flex-col border-r border-border glass">
       <div className="px-5 py-6">
-        <Link href="/" className="text-lg font-semibold text-fg tracking-tight">
-          Factorial
-          <span className="text-accent ml-1">Posts</span>
+        <Link href="/" className="text-lg font-display font-bold tracking-tight">
+          <span className="gradient-text">Factorial Posts</span>
         </Link>
       </div>
 
-      <nav className="flex-1 px-3 space-y-1">
+      <nav className="flex-1 px-3 space-y-0.5">
         {NAV_ITEMS.map((item) => {
           const isActive =
             item.href === "/"
@@ -47,10 +46,10 @@ export default function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ease-out ${
                 isActive
-                  ? "bg-accent-muted text-accent"
-                  : "text-text-secondary hover:text-fg hover:bg-surface-elevated"
+                  ? "bg-accent-muted text-accent border-l-2 border-accent"
+                  : "text-text-secondary hover:text-fg hover:bg-white/[0.04]"
               }`}
             >
               <Icon size={18} strokeWidth={isActive ? 2 : 1.5} />
@@ -72,7 +71,7 @@ export default function Sidebar() {
           </div>
           <button
             onClick={signOut}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-text-secondary hover:text-fg hover:bg-surface-elevated transition-colors w-full"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-text-secondary hover:text-fg hover:bg-white/[0.04] transition-all duration-150 ease-out w-full"
           >
             <LogOut size={18} strokeWidth={1.5} />
             Log out

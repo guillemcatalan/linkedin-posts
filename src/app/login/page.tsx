@@ -82,14 +82,14 @@ export default function LoginPage() {
   }
 
   const inputClass =
-    "w-full px-4 py-3 bg-surface border border-border rounded-lg text-fg placeholder:text-[#555] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 transition-colors";
+    "w-full px-4 py-3 glass rounded-lg text-fg placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 transition-all duration-150 ease-out";
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6 py-12">
+    <div className="min-h-screen flex items-center justify-center px-6 py-12 bg-glow-violet">
       <div className="flex flex-col items-center gap-8 w-full max-w-sm">
         <div className="text-center">
-          <h1 className="text-3xl font-semibold text-fg tracking-tight">
-            Factorial <span className="text-accent">Posts</span>
+          <h1 className="text-3xl font-display font-bold text-fg tracking-tight">
+            <span className="gradient-text">Factorial Posts</span>
           </h1>
           <p className="mt-3 text-text-secondary text-sm">
             {mode === "signin"
@@ -157,7 +157,7 @@ export default function LoginPage() {
                   setCustomRole("");
                 }}
                 required
-                className={`${inputClass} ${!department ? "text-[#555]" : ""}`}
+                className={`${inputClass} ${!department ? "text-zinc-600" : ""}`}
               >
                 <option value="" disabled>
                   Department
@@ -174,7 +174,7 @@ export default function LoginPage() {
                   value={role}
                   onChange={(e) => setRole(e.target.value)}
                   required
-                  className={`${inputClass} ${!role ? "text-[#555]" : ""}`}
+                  className={`${inputClass} ${!role ? "text-zinc-600" : ""}`}
                 >
                   <option value="" disabled>
                     Your role
@@ -217,7 +217,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full px-6 py-3 bg-accent text-bg rounded-full font-medium hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors mt-1"
+            className="w-full px-6 py-3 bg-accent text-white rounded-full font-medium hover:bg-accent-hover hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150 ease-out mt-1"
           >
             {loading
               ? "Loading..."
@@ -232,7 +232,7 @@ export default function LoginPage() {
             setMode(mode === "signin" ? "signup" : "signin");
             setError("");
           }}
-          className="text-sm text-text-secondary hover:text-fg transition-colors"
+          className="text-sm text-text-secondary hover:text-accent-secondary transition-colors duration-150 ease-out"
         >
           {mode === "signin"
             ? "Don't have an account? Sign up"

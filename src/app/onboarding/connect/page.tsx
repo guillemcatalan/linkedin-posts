@@ -41,7 +41,7 @@ function ConnectLinkedInContent() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6">
+    <div className="min-h-screen flex items-center justify-center px-6 bg-glow-violet">
       <div className="w-full max-w-md">
         <OnboardingProgress current={2} />
 
@@ -49,7 +49,7 @@ function ConnectLinkedInContent() {
           <div className="w-14 h-14 rounded-2xl bg-[#0A66C2]/10 flex items-center justify-center mx-auto mb-5">
             <LinkedInIcon />
           </div>
-          <h1 className="text-2xl font-semibold text-fg tracking-tight">
+          <h1 className="text-2xl font-display font-semibold text-fg tracking-tight">
             Connect your LinkedIn
           </h1>
           <p className="mt-3 text-text-secondary text-sm leading-relaxed max-w-xs mx-auto">
@@ -69,7 +69,7 @@ function ConnectLinkedInContent() {
           </div>
         ) : (
           <div className="space-y-3 mb-8">
-            <div className="bg-surface border border-border rounded-xl p-4 text-sm">
+            <div className="glass rounded-xl p-4 text-sm">
               <p className="font-medium text-fg mb-2">
                 What permissions we request
               </p>
@@ -98,7 +98,7 @@ function ConnectLinkedInContent() {
             <button
               onClick={handleConnect}
               disabled={!userId}
-              className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-[#0A66C2] text-white rounded-full font-medium hover:bg-[#004182] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-[#0A66C2] text-white rounded-full font-medium hover:bg-[#004182] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150 ease-out"
             >
               <LinkedInIcon size={18} />
               Connect with LinkedIn
@@ -107,9 +107,9 @@ function ConnectLinkedInContent() {
 
           <button
             onClick={() => router.push("/onboarding/import")}
-            className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-full font-medium transition-colors ${
+            className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-full font-medium transition-all duration-150 ease-out ${
               connected
-                ? "bg-accent text-bg hover:bg-accent-hover"
+                ? "bg-accent text-white hover:bg-accent-hover hover:scale-[1.02]"
                 : "border border-border text-text-secondary hover:text-fg hover:border-text-secondary"
             }`}
           >

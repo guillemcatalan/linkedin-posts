@@ -48,7 +48,7 @@ export default function PostForm({ userId, onResults }: PostFormProps) {
           onChange={(e) => setIdea(e.target.value)}
           required
           rows={3}
-          className="w-full px-4 py-3 bg-surface border border-border rounded-xl text-fg placeholder:text-[#555] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 resize-none transition-colors"
+          className="w-full px-4 py-3 glass rounded-xl text-fg placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 resize-none transition-all duration-150 ease-out"
         />
       </div>
 
@@ -57,7 +57,7 @@ export default function PostForm({ userId, onResults }: PostFormProps) {
       <button
         type="submit"
         disabled={loading}
-        className="px-6 py-3 bg-accent text-bg rounded-full font-medium hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="px-6 py-3 bg-accent text-white rounded-full font-medium hover:bg-accent-hover hover:scale-[1.02] hover:glow-violet disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150 ease-out"
       >
         {loading ? "Generating..." : "Generate 3 posts"}
       </button>

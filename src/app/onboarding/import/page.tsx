@@ -61,7 +61,7 @@ function ImportDataContent() {
     !importResult.startsWith("No ");
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6">
+    <div className="min-h-screen flex items-center justify-center px-6 bg-glow-violet">
       <div className="w-full max-w-md">
         <OnboardingProgress current={3} />
 
@@ -73,7 +73,7 @@ function ImportDataContent() {
               <Upload size={28} className="text-accent" />
             )}
           </div>
-          <h1 className="text-2xl font-semibold text-fg tracking-tight">
+          <h1 className="text-2xl font-display font-semibold text-fg tracking-tight">
             Your writing style
           </h1>
           <p className="mt-3 text-text-secondary text-sm leading-relaxed max-w-xs mx-auto">
@@ -130,7 +130,7 @@ function ImportDataContent() {
 
         {!isSuccess && (
           <>
-            <div className="bg-surface border border-border rounded-xl p-4 text-sm mb-5">
+            <div className="glass rounded-xl p-4 text-sm mb-5">
               <p className="font-medium text-fg mb-2">How to get your data</p>
               <ol className="list-decimal list-inside space-y-1.5 text-xs text-text-secondary leading-relaxed">
                 <li>
@@ -139,7 +139,7 @@ function ImportDataContent() {
                     href="https://www.linkedin.com/mypreferences/d/download-my-data"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-accent hover:underline"
+                    className="text-accent-secondary hover:underline"
                   >
                     linkedin.com/mypreferences/d/download-my-data
                   </a>
@@ -155,7 +155,7 @@ function ImportDataContent() {
               </ol>
             </div>
 
-            <label className="flex flex-col items-center justify-center w-full h-20 border border-dashed border-border rounded-xl cursor-pointer hover:border-text-secondary transition-colors mb-4">
+            <label className="flex flex-col items-center justify-center w-full h-20 border border-dashed border-border rounded-xl cursor-pointer hover:border-text-secondary transition-all duration-150 ease-out mb-4">
               {uploading ? (
                 <div className="flex items-center gap-2 text-text-secondary">
                   <div className="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />
@@ -186,11 +186,11 @@ function ImportDataContent() {
         <button
           onClick={handleEnter}
           disabled={entering}
-          className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-accent text-bg rounded-full font-medium hover:bg-accent-hover disabled:opacity-70 transition-colors"
+          className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-accent text-white rounded-full font-medium hover:bg-accent-hover hover:scale-[1.02] disabled:opacity-70 transition-all duration-150 ease-out"
         >
           {entering ? (
             <>
-              <div className="w-4 h-4 border-2 border-bg border-t-transparent rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
               Loading...
             </>
           ) : (

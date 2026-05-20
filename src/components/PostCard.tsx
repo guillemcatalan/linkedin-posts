@@ -52,25 +52,25 @@ export default function PostCard({
     .slice(0, 2);
 
   return (
-    <div className="bg-surface border border-border rounded-xl p-6 space-y-4">
+    <div className="glass rounded-xl p-6 space-y-4 transition-all duration-150 ease-out hover:border-white/[0.12] hover:scale-[1.01]">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
           {rank !== undefined && (
             <span
-              className={`text-lg font-bold tabular-nums w-7 ${
+              className={`text-lg font-display font-bold tabular-nums w-7 ${
                 rank === 1
-                  ? "text-accent"
+                  ? "gradient-text"
                   : rank === 2
-                    ? "text-zinc-400"
+                    ? "text-accent-secondary"
                     : rank === 3
-                      ? "text-amber-700"
+                      ? "text-zinc-400"
                       : "text-text-secondary"
               }`}
             >
               {rank}
             </span>
           )}
-          <div className="w-9 h-9 rounded-full bg-surface-elevated border border-border flex items-center justify-center text-xs font-medium text-text-secondary">
+          <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-medium text-text-secondary bg-surface-elevated" style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.2), rgba(6,182,212,0.2))', border: '1px solid rgba(124,58,237,0.3)' }}>
             {initials}
           </div>
           <div>

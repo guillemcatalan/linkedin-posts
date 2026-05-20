@@ -106,12 +106,12 @@ export default function ProfilePage() {
   if (!user) return null;
 
   const inputClass =
-    "w-full px-4 py-3 bg-surface border border-border rounded-lg text-fg placeholder:text-[#555] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 transition-colors";
+    "w-full px-4 py-3 glass rounded-lg text-fg placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 transition-all duration-150 ease-out";
 
   return (
     <div className="max-w-xl mx-auto px-6 py-10">
       <div className="mb-10">
-        <h1 className="text-2xl font-semibold text-fg tracking-tight">
+        <h1 className="text-3xl font-display font-semibold text-fg tracking-tight">
           Profile
         </h1>
         <p className="mt-1 text-sm text-text-secondary">{user.email}</p>
@@ -230,7 +230,7 @@ export default function ProfilePage() {
 
         <button
           type="submit"
-          className="px-6 py-2.5 bg-accent text-bg rounded-full font-medium hover:bg-accent-hover transition-colors text-sm"
+          className="px-6 py-2.5 bg-accent text-white rounded-full font-medium hover:bg-accent-hover hover:scale-[1.02] transition-all duration-150 ease-out text-sm"
         >
           {saved ? "Saved!" : "Save changes"}
         </button>
@@ -238,7 +238,7 @@ export default function ProfilePage() {
 
       {/* LinkedIn connection */}
       <div className="border-t border-border pt-8 mb-8">
-        <h2 className="text-lg font-medium text-fg mb-2">LinkedIn connection</h2>
+        <h2 className="text-lg font-display font-medium text-fg mb-2">LinkedIn connection</h2>
         {linkedinConnected ? (
           <div className="flex items-center gap-2 bg-green-400/10 border border-green-400/20 rounded-xl px-4 py-3">
             <CheckCircle size={16} className="text-green-400 shrink-0" />
@@ -254,7 +254,7 @@ export default function ProfilePage() {
             </p>
             <button
               onClick={handleConnectLinkedIn}
-              className="flex items-center gap-2 px-5 py-2.5 bg-[#0A66C2] text-white rounded-full text-sm font-medium hover:bg-[#004182] transition-colors"
+              className="flex items-center gap-2 px-5 py-2.5 bg-[#0A66C2] text-white rounded-full text-sm font-medium hover:bg-[#004182] transition-all duration-150 ease-out"
             >
               <svg width={16} height={16} viewBox="0 0 24 24" fill="currentColor">
                 <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
@@ -268,7 +268,7 @@ export default function ProfilePage() {
       {/* Writing style / ZIP */}
       <div className="border-t border-border pt-8 space-y-5">
         <div>
-          <h2 className="text-lg font-medium text-fg">Your writing style</h2>
+          <h2 className="text-lg font-display font-medium text-fg">Your writing style</h2>
           <p className="mt-1 text-sm text-text-secondary leading-relaxed">
             Upload your LinkedIn data export so the system can learn how you
             write. Posts will feel more authentic and match your personal style.
@@ -279,7 +279,7 @@ export default function ProfilePage() {
           </p>
         </div>
 
-        <div className="bg-surface border border-border rounded-xl p-4 text-sm text-text-secondary space-y-2">
+        <div className="glass rounded-xl p-4 text-sm text-text-secondary space-y-2">
           <p className="font-medium text-fg text-sm">How to get your data</p>
           <ol className="list-decimal list-inside space-y-1 text-xs leading-relaxed">
             <li>
@@ -288,7 +288,7 @@ export default function ProfilePage() {
                 href="https://www.linkedin.com/mypreferences/d/download-my-data"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-accent hover:underline"
+                className="text-accent-secondary hover:underline"
               >
                 linkedin.com/mypreferences/d/download-my-data
               </a>
@@ -303,7 +303,7 @@ export default function ProfilePage() {
           </ol>
         </div>
 
-        <label className="flex flex-col items-center justify-center w-full h-24 border border-dashed border-border rounded-xl cursor-pointer hover:border-text-secondary transition-colors">
+        <label className="flex flex-col items-center justify-center w-full h-24 border border-dashed border-border rounded-xl cursor-pointer hover:border-text-secondary transition-all duration-150 ease-out">
           {uploading ? (
             <p className="text-sm text-text-secondary">Processing...</p>
           ) : (
@@ -337,7 +337,7 @@ export default function ProfilePage() {
       <div className="border-t border-border pt-8 mt-8">
         <button
           onClick={signOut}
-          className="text-sm text-text-secondary hover:text-fg transition-colors"
+          className="text-sm text-text-secondary hover:text-fg transition-colors duration-150 ease-out"
         >
           Log out
         </button>
@@ -345,4 +345,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-

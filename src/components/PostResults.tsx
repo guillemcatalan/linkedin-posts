@@ -19,10 +19,10 @@ export default function PostResults({
   return (
     <div className="flex flex-col gap-5 w-full">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-fg">Your posts</h2>
+        <h2 className="text-xl font-display font-semibold text-fg">Your posts</h2>
         <button
           onClick={onStartOver}
-          className="text-sm text-text-secondary hover:text-fg transition-colors"
+          className="text-sm text-text-secondary hover:text-accent-secondary transition-colors duration-150 ease-out"
         >
           Start over
         </button>
@@ -75,7 +75,7 @@ function VariantCard({
   }
 
   return (
-    <div className="bg-surface border border-border rounded-xl p-6 flex flex-col gap-4">
+    <div className="glass rounded-xl p-6 flex flex-col gap-4 transition-all duration-150 ease-out hover:border-white/[0.12]">
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium text-text-secondary">
           Variant {index}
@@ -91,7 +91,7 @@ function VariantCard({
             {variant.wordCount} words
           </span>
           {variant.qualityScore.passed ? (
-            <span className="text-xs text-green-400 bg-green-400/10 px-2 py-0.5 rounded-full">
+            <span className="text-xs text-accent bg-accent-muted px-2 py-0.5 rounded-full">
               Quality OK
             </span>
           ) : (
@@ -109,7 +109,7 @@ function VariantCard({
       <div className="flex items-center justify-end gap-2 pt-1">
         <button
           onClick={handleCopy}
-          className="flex items-center gap-2 text-sm px-4 py-2 border border-border rounded-full text-text-secondary hover:text-fg hover:bg-surface-elevated transition-colors"
+          className="flex items-center gap-2 text-sm px-4 py-2 glass rounded-full text-text-secondary hover:text-fg transition-all duration-150 ease-out"
         >
           {copied ? <Check size={14} /> : <Copy size={14} />}
           {copied ? "Copied" : "Copy"}
@@ -117,7 +117,7 @@ function VariantCard({
         <button
           onClick={handlePublish}
           disabled={published || publishing || !postId}
-          className="flex items-center gap-2 text-sm px-4 py-2 bg-accent text-bg rounded-full font-medium hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="flex items-center gap-2 text-sm px-4 py-2 bg-accent text-white rounded-full font-medium hover:bg-accent-hover hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150 ease-out"
         >
           {published ? (
             <>

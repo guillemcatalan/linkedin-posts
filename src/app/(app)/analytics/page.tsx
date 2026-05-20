@@ -64,7 +64,7 @@ export default function AnalyticsPage() {
   return (
     <div className="max-w-2xl mx-auto px-6 py-10">
       <div className="mb-10">
-        <h1 className="text-2xl font-semibold text-fg tracking-tight">
+        <h1 className="text-3xl font-display font-semibold text-fg tracking-tight">
           Analytics
         </h1>
         <p className="mt-1 text-sm text-text-secondary">
@@ -78,7 +78,7 @@ export default function AnalyticsPage() {
           return (
             <div
               key={stat.label}
-              className="bg-surface border border-border rounded-xl p-5"
+              className="glass rounded-xl p-5 transition-all duration-150 ease-out hover:border-white/[0.12] hover:glow-violet"
             >
               <div className="flex items-center gap-2 mb-3">
                 <Icon size={16} className="text-text-secondary" />
@@ -86,7 +86,7 @@ export default function AnalyticsPage() {
                   {stat.label}
                 </span>
               </div>
-              <p className="text-2xl font-semibold text-fg tabular-nums">
+              <p className="text-2xl font-display font-semibold text-fg tabular-nums">
                 {stat.value}
               </p>
             </div>
@@ -96,7 +96,7 @@ export default function AnalyticsPage() {
 
       {posts.length > 0 && (
         <>
-          <h2 className="text-lg font-medium text-fg mb-4">
+          <h2 className="text-lg font-display font-medium text-fg mb-4">
             Post performance
           </h2>
           <div className="space-y-3">
@@ -111,16 +111,16 @@ export default function AnalyticsPage() {
               return (
                 <div
                   key={post.id}
-                  className="bg-surface border border-border rounded-xl p-4"
+                  className="glass rounded-xl p-4 transition-all duration-150 ease-out hover:border-white/[0.12]"
                 >
                   <p className="text-sm text-fg/80 truncate mb-3">
                     {post.input_idea}
                   </p>
                   <div className="flex items-center gap-4">
-                    <div className="flex-1 h-2 bg-surface-elevated rounded-full overflow-hidden">
+                    <div className="flex-1 h-2 bg-white/[0.04] rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-accent rounded-full transition-all"
-                        style={{ width: `${barWidth}%` }}
+                        className="h-full rounded-full transition-all"
+                        style={{ width: `${barWidth}%`, background: 'linear-gradient(90deg, #7C3AED, #06B6D4)' }}
                       />
                     </div>
                     <div className="flex items-center gap-4 text-xs text-text-secondary shrink-0">
