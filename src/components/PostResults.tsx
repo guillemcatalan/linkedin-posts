@@ -1,35 +1,57 @@
 "use client";
 
 import { useState } from "react";
+import { Copy, Check, Send } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 import type { PostVariant } from "@/types";
 
 interface PostResultsProps {
   variants: PostVariant[];
+  postId: string | null;
   onStartOver: () => void;
 }
 
-export default function PostResults({ variants, onStartOver }: PostResultsProps) {
+export default function PostResults({
+  variants,
+  postId,
+  onStartOver,
+}: PostResultsProps) {
   return (
-    <div className="flex flex-col gap-6 w-full">
+    <div className="flex flex-col gap-5 w-full">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-zinc-900">Your posts</h2>
+        <h2 className="text-xl font-semibold text-fg">Your posts</h2>
         <button
           onClick={onStartOver}
-          className="text-sm text-zinc-500 hover:text-zinc-900 transition-colors"
+          className="text-sm text-text-secondary hover:text-fg transition-colors"
         >
           Start over
         </button>
       </div>
 
       {variants.map((variant, i) => (
-        <VariantCard key={i} variant={variant} index={i + 1} />
+        <VariantCard
+          key={i}
+          variant={variant}
+          index={i + 1}
+          postId={postId}
+        />
       ))}
     </div>
   );
 }
 
-function VariantCard({ variant, index }: { variant: PostVariant; index: number }) {
+function VariantCard({
+  variant,
+  index,
+  postId,
+}: {
+  variant: PostVariant;
+  index: number;
+  postId: string | null;
+}) {
   const [copied, setCopied] = useState(false);
+  const [published, setPublished] = useState(false);
+  const [publishing, setPublishing] = useState(false);
 
   async function handleCopy() {
     await navigator.clipboard.writeText(variant.text);
@@ -37,40 +59,79 @@ function VariantCard({ variant, index }: { variant: PostVariant; index: number }
     setTimeout(() => setCopied(false), 2000);
   }
 
-  const wordCountColor = variant.qualityScore.wordCountInRange
-    ? "text-green-600"
-    : "text-amber-600";
+  async function handlePublish() {
+    if (!postId) return;
+    setPublishing(true);
+    await supabase
+      .from("generated_posts")
+      .update({
+        selected_variant: index,
+        status: "published",
+        published_at: new Date().toISOString(),
+      })
+      .eq("id", postId);
+    setPublished(true);
+    setPublishing(false);
+  }
 
   return (
-    <div className="border border-zinc-200 rounded-lg p-5 flex flex-col gap-3">
+    <div className="bg-surface border border-border rounded-xl p-6 flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-zinc-500">Variant {index}</span>
+        <span className="text-sm font-medium text-text-secondary">
+          Variant {index}
+        </span>
         <div className="flex items-center gap-3">
-          <span className={`text-xs ${wordCountColor}`}>
+          <span
+            className={`text-xs tabular-nums ${
+              variant.qualityScore.wordCountInRange
+                ? "text-green-400"
+                : "text-amber-400"
+            }`}
+          >
             {variant.wordCount} words
           </span>
           {variant.qualityScore.passed ? (
-            <span className="text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded">
+            <span className="text-xs text-green-400 bg-green-400/10 px-2 py-0.5 rounded-full">
               Quality OK
             </span>
           ) : (
-            <span className="text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded">
-              Check quality
+            <span className="text-xs text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-full">
+              Review
             </span>
           )}
         </div>
       </div>
 
-      <p className="text-zinc-800 whitespace-pre-line leading-relaxed text-sm">
+      <p className="text-sm text-fg/90 whitespace-pre-line leading-relaxed">
         {variant.text}
       </p>
 
-      <button
-        onClick={handleCopy}
-        className="self-end text-sm px-4 py-1.5 border border-zinc-300 rounded-md hover:bg-zinc-50 transition-colors"
-      >
-        {copied ? "Copied!" : "Copy"}
-      </button>
+      <div className="flex items-center justify-end gap-2 pt-1">
+        <button
+          onClick={handleCopy}
+          className="flex items-center gap-2 text-sm px-4 py-2 border border-border rounded-full text-text-secondary hover:text-fg hover:bg-surface-elevated transition-colors"
+        >
+          {copied ? <Check size={14} /> : <Copy size={14} />}
+          {copied ? "Copied" : "Copy"}
+        </button>
+        <button
+          onClick={handlePublish}
+          disabled={published || publishing || !postId}
+          className="flex items-center gap-2 text-sm px-4 py-2 bg-accent text-bg rounded-full font-medium hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          {published ? (
+            <>
+              <Check size={14} />
+              Published
+            </>
+          ) : (
+            <>
+              <Send size={14} />
+              {publishing ? "Publishing..." : "Publish"}
+            </>
+          )}
+        </button>
+      </div>
     </div>
   );
 }

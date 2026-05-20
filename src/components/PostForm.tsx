@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { supabase } from "@/lib/supabase";
 import type { PostVariant } from "@/types";
 
 interface PostFormProps {
   userId: string;
-  onResults: (variants: PostVariant[]) => void;
+  onResults: (variants: PostVariant[], postId: string | null) => void;
 }
 
 export default function PostForm({ userId, onResults }: PostFormProps) {
@@ -19,16 +20,15 @@ export default function PostForm({ userId, onResults }: PostFormProps) {
     setError("");
 
     try {
-      const res = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, idea }),
-      });
+      const { data, error: fnError } = await supabase.functions.invoke(
+        "generate",
+        { body: { idea, userId } }
+      );
 
-      if (!res.ok) throw new Error("Generation failed");
+      if (fnError) throw fnError;
+      if (!data?.variants?.length) throw new Error("No variants returned");
 
-      const { variants } = await res.json();
-      onResults(variants);
+      onResults(data.variants, data.postId ?? null);
     } catch {
       setError("Failed to generate posts. Try again.");
     } finally {
@@ -39,7 +39,7 @@ export default function PostForm({ userId, onResults }: PostFormProps) {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5 w-full">
       <div>
-        <label className="block text-sm font-medium text-zinc-700 mb-1">
+        <label className="block text-sm font-medium text-fg mb-2">
           What do you want to post about?
         </label>
         <textarea
@@ -47,17 +47,17 @@ export default function PostForm({ userId, onResults }: PostFormProps) {
           value={idea}
           onChange={(e) => setIdea(e.target.value)}
           required
-          rows={2}
-          className="w-full px-4 py-3 border border-zinc-300 rounded-lg text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 resize-none"
+          rows={3}
+          className="w-full px-4 py-3 bg-surface border border-border rounded-xl text-fg placeholder:text-[#555] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 resize-none transition-colors"
         />
       </div>
 
-      {error && <p className="text-red-600 text-sm">{error}</p>}
+      {error && <p className="text-red-400 text-sm">{error}</p>}
 
       <button
         type="submit"
         disabled={loading}
-        className="px-6 py-3 bg-zinc-900 text-white rounded-lg font-medium hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="px-6 py-3 bg-accent text-bg rounded-full font-medium hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         {loading ? "Generating..." : "Generate 3 posts"}
       </button>

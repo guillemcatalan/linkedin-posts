@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Nav from "@/components/Nav";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Factorial LinkedIn Post Generator",
-  description: "Generate authentic LinkedIn posts for the Factorial partners team",
+  title: "Factorial Posts",
+  description: "Generate and publish authentic LinkedIn posts for Factorial",
 };
 
 export default function RootLayout({
@@ -28,10 +27,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-white">
-        <Nav />
-        {children}
-      </body>
+      <body className="min-h-full bg-bg text-fg">{children}</body>
     </html>
   );
 }
