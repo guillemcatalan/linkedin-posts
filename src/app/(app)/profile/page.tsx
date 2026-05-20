@@ -91,50 +91,11 @@ export default function ProfilePage() {
     setImportResult(null);
 
     try {
-      const JSZip = (await import("jszip")).default;
-      const buffer = await file.arrayBuffer();
-      const zip = await JSZip.loadAsync(buffer);
-
-      let postsCount = 0;
-      const sharesFile =
-        zip.file("Shares.csv") ??
-        Object.values(zip.files).find(
-          (f) => !f.dir && f.name.toLowerCase().endsWith("shares.csv")
-        );
-
-      if (sharesFile) {
-        const content = await sharesFile.async("text");
-        const rows = parseCSV(content);
-        const inserts = rows
-          .map((row) => {
-            const text =
-              row["ShareCommentary"] || row["shareCommentary"] || "";
-            if (!text.trim()) return null;
-            const date =
-              row["Date"] || row["SharedDate"] || row["date"] || "";
-            return {
-              user_id: user.id,
-              post_text: text,
-              post_date: date || null,
-            };
-          })
-          .filter(
-            (
-              r
-            ): r is {
-              user_id: string;
-              post_text: string;
-              post_date: string | null;
-            } => r !== null
-          );
-
-        if (inserts.length > 0) {
-          await supabase.from("user_posts").insert(inserts);
-          postsCount = inserts.length;
-        }
-      }
-
-      setImportResult(`Imported ${postsCount} posts.`);
+      const { processLinkedInZip, formatImportResult } = await import(
+        "@/lib/linkedin-zip"
+      );
+      const result = await processLinkedInZip(file, user.id, supabase);
+      setImportResult(formatImportResult(result));
     } catch {
       setImportResult("Failed to process ZIP file.");
     } finally {
@@ -333,15 +294,10 @@ export default function ProfilePage() {
               </a>
             </li>
             <li>
-              Select{" "}
-              <strong className="text-fg">
-                &quot;Download larger data archive&quot;
-              </strong>
+              Request your data (either the basic or larger archive works)
             </li>
             <li>
-              Click{" "}
-              <strong className="text-fg">&quot;Request archive&quot;</strong> —
-              you&apos;ll get an email when ready
+              Download the .zip when LinkedIn emails you
             </li>
             <li>Upload the .zip below (don&apos;t unzip it)</li>
           </ol>
@@ -358,7 +314,7 @@ export default function ProfilePage() {
           )}
           <input
             type="file"
-            accept=".zip"
+            accept=".zip,application/zip,application/x-zip-compressed"
             onChange={handleUpload}
             disabled={uploading}
             className="hidden"
@@ -390,50 +346,3 @@ export default function ProfilePage() {
   );
 }
 
-function parseCSV(text: string): Record<string, string>[] {
-  const lines = text.split("\n");
-  if (lines.length < 2) return [];
-  const headers = parseCSVLine(lines[0]);
-  const rows: Record<string, string>[] = [];
-  for (let i = 1; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (!line) continue;
-    const values = parseCSVLine(line);
-    const row: Record<string, string> = {};
-    headers.forEach((h, idx) => {
-      row[h.trim()] = (values[idx] || "").trim();
-    });
-    rows.push(row);
-  }
-  return rows;
-}
-
-function parseCSVLine(line: string): string[] {
-  const result: string[] = [];
-  let current = "";
-  let inQuotes = false;
-  for (let i = 0; i < line.length; i++) {
-    const char = line[i];
-    if (inQuotes) {
-      if (char === '"' && line[i + 1] === '"') {
-        current += '"';
-        i++;
-      } else if (char === '"') {
-        inQuotes = false;
-      } else {
-        current += char;
-      }
-    } else {
-      if (char === '"') {
-        inQuotes = true;
-      } else if (char === ",") {
-        result.push(current);
-        current = "";
-      } else {
-        current += char;
-      }
-    }
-  }
-  result.push(current);
-  return result;
-}
