@@ -139,29 +139,91 @@ serve(async (req: Request) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    const { data: user } = await supabaseAdmin
-      .from("users")
-      .select("name, nickname, department, role, role_description")
-      .eq("id", userId)
-      .single();
+    const [
+      { data: user },
+      { data: profile },
+      { data: positions },
+      { data: education },
+      { data: certifications },
+      { data: projects },
+      { data: style },
+      { data: pastPosts },
+    ] = await Promise.all([
+      supabaseAdmin.from("users").select("name, nickname, department, role, role_description").eq("id", userId).single(),
+      supabaseAdmin.from("profiles").select("headline, about, location, languages").eq("user_id", userId).single(),
+      supabaseAdmin.from("user_positions").select("title, company, description, started_on, finished_on, is_current").eq("user_id", userId).order("is_current", { ascending: false }),
+      supabaseAdmin.from("user_education").select("school, degree, field_of_study, finished_on").eq("user_id", userId),
+      supabaseAdmin.from("user_certifications").select("name, authority").eq("user_id", userId),
+      supabaseAdmin.from("user_projects").select("title, description").eq("user_id", userId),
+      supabaseAdmin.from("user_style").select("common_topics, tone, writing_notes").eq("user_id", userId).single(),
+      supabaseAdmin.from("user_posts").select("post_text").eq("user_id", userId).limit(5),
+    ]);
 
     // Build system prompt with user context
     const systemParts = [SYSTEM_PROMPT, POST_STRUCTURE, FACTORIAL_CONTEXT];
 
     if (user) {
-      const userContext = [
+      const sections: string[] = [
         `# Current User`,
         `Name: ${user.name}`,
         user.nickname ? `Nickname: ${user.nickname}` : null,
         `Department: ${user.department}`,
         user.role ? `Role: ${user.role}` : null,
         user.role_description ? `Daily work: ${user.role_description}` : null,
-        ``,
-        `Write from this person's perspective, department voice, and daily reality.`,
-      ]
-        .filter(Boolean)
-        .join("\n");
-      systemParts.push(userContext);
+      ].filter(Boolean) as string[];
+
+      if (profile) {
+        if (profile.headline) sections.push(`LinkedIn headline: ${profile.headline}`);
+        if (profile.about) sections.push(`About: ${profile.about}`);
+        if (profile.location) sections.push(`Location: ${profile.location}`);
+        if (profile.languages) sections.push(`Languages: ${profile.languages}`);
+      }
+
+      if (positions?.length) {
+        sections.push(``, `## Career trajectory`);
+        for (const p of positions) {
+          const period = p.is_current ? `${p.started_on} — present` : `${p.started_on} — ${p.finished_on}`;
+          sections.push(`- **${p.title}** at ${p.company} (${period})${p.description ? `: ${p.description}` : ""}`);
+        }
+      }
+
+      if (education?.length) {
+        sections.push(``, `## Education`);
+        for (const e of education) {
+          const degree = [e.degree, e.field_of_study].filter(Boolean).join(" in ");
+          sections.push(`- ${degree ? `${degree}, ` : ""}${e.school}${e.finished_on ? ` (${e.finished_on})` : ""}`);
+        }
+      }
+
+      if (certifications?.length) {
+        sections.push(``, `## Certifications`);
+        for (const c of certifications) {
+          sections.push(`- ${c.name}${c.authority ? ` — ${c.authority}` : ""}`);
+        }
+      }
+
+      if (projects?.length) {
+        sections.push(``, `## Projects`);
+        for (const p of projects) {
+          sections.push(`- **${p.title}**${p.description ? `: ${p.description}` : ""}`);
+        }
+      }
+
+      if (style?.common_topics) {
+        sections.push(``, `## Skills & topics: ${style.common_topics}`);
+      }
+
+      if (pastPosts?.length) {
+        sections.push(``, `## Writing style reference (past LinkedIn posts by this person)`);
+        for (const p of pastPosts) {
+          const trimmed = p.post_text.length > 500 ? p.post_text.slice(0, 500) + "…" : p.post_text;
+          sections.push(`---`, trimmed);
+        }
+        sections.push(`---`, ``, `Match this person's tone, vocabulary, and rhythm. Do not copy these posts — use them as style reference only.`);
+      }
+
+      sections.push(``, `Write from this person's perspective, department voice, and daily reality.`);
+      systemParts.push(sections.join("\n"));
     }
 
     const fullSystemPrompt = systemParts.join("\n\n---\n\n");
