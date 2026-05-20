@@ -1,8 +1,8 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Upload, CheckCircle, ArrowRight } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { Upload, CheckCircle, ArrowRight, AlertCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import OnboardingProgress from "@/components/OnboardingProgress";
 
@@ -15,22 +15,23 @@ export default function ImportDataPage() {
 }
 
 function ImportDataContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [userId, setUserId] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [importResult, setImportResult] = useState<string | null>(null);
+  const [entering, setEntering] = useState(false);
   const linkedinConnected = searchParams.get("linkedin") === "connected";
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        router.replace("/login");
-        return;
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        setUserId(session.user.id);
       }
-      setUserId(session.user.id);
     });
-  }, [router]);
+    return () => subscription.unsubscribe();
+  }, []);
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -51,6 +52,17 @@ function ImportDataContent() {
     }
   }
 
+  function handleEnter() {
+    setEntering(true);
+    window.location.href =
+      (process.env.NODE_ENV === "production" ? "/linkedin-posts" : "") + "/";
+  }
+
+  const isSuccess =
+    importResult !== null &&
+    !importResult.startsWith("Failed") &&
+    !importResult.startsWith("No ");
+
   return (
     <div className="min-h-screen flex items-center justify-center px-6">
       <div className="w-full max-w-md">
@@ -58,7 +70,11 @@ function ImportDataContent() {
 
         <div className="text-center mb-8">
           <div className="w-14 h-14 rounded-2xl bg-accent-muted flex items-center justify-center mx-auto mb-5">
-            <Upload size={28} className="text-accent" />
+            {isSuccess ? (
+              <CheckCircle size={28} className="text-green-400" />
+            ) : (
+              <Upload size={28} className="text-accent" />
+            )}
           </div>
           <h1 className="text-2xl font-semibold text-fg tracking-tight">
             Your writing style
@@ -88,79 +104,106 @@ function ImportDataContent() {
           </div>
         )}
 
-        <div className="bg-surface border border-border rounded-xl p-4 text-sm mb-5">
-          <p className="font-medium text-fg mb-2">How to get your data</p>
-          <ol className="list-decimal list-inside space-y-1.5 text-xs text-text-secondary leading-relaxed">
-            <li>
-              Open{" "}
-              <a
-                href="https://www.linkedin.com/mypreferences/d/download-my-data"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-accent hover:underline"
-              >
-                linkedin.com/mypreferences/d/download-my-data
-              </a>
-            </li>
-            <li>
-              Request your data (either the basic or larger archive works)
-            </li>
-            <li>
-              Download the .zip when LinkedIn emails you (can take minutes to
-              72h)
-            </li>
-            <li>Upload the .zip here or later from your Profile</li>
-          </ol>
-        </div>
-
-        <label className="flex flex-col items-center justify-center w-full h-20 border border-dashed border-border rounded-xl cursor-pointer hover:border-text-secondary transition-colors mb-4">
-          {uploading ? (
-            <div className="flex items-center gap-2 text-text-secondary">
-              <div className="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-              <span className="text-sm">Processing...</span>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2 text-text-secondary">
-              <Upload size={16} />
-              <span className="text-sm">Upload LinkedIn ZIP</span>
-            </div>
-          )}
-          <input
-            type="file"
-            accept=".zip,application/zip,application/x-zip-compressed"
-            onChange={handleUpload}
-            disabled={uploading}
-            className="hidden"
-          />
-        </label>
-
         {importResult && (
-          <p
-            className={`text-sm px-4 py-2 rounded-lg text-center mb-4 ${
-              importResult.startsWith("Failed") ||
-              importResult.startsWith("No posts")
-                ? "text-red-400 bg-red-400/10"
-                : "text-green-400 bg-green-400/10"
+          <div
+            className={`flex items-start gap-2 rounded-xl px-4 py-3 mb-4 ${
+              isSuccess
+                ? "bg-green-400/10 border border-green-400/20"
+                : "bg-red-400/10 border border-red-400/20"
             }`}
           >
-            {importResult}
-          </p>
+            {isSuccess ? (
+              <CheckCircle
+                size={16}
+                className="text-green-400 shrink-0 mt-0.5"
+              />
+            ) : (
+              <AlertCircle
+                size={16}
+                className="text-red-400 shrink-0 mt-0.5"
+              />
+            )}
+            <p
+              className={`text-sm ${isSuccess ? "text-green-400" : "text-red-400"}`}
+            >
+              {importResult}
+            </p>
+          </div>
         )}
 
-        <p className="text-xs text-text-secondary text-center mb-5">
-          Don&apos;t have the file yet? No problem — you can upload it later
-          from your Profile.
-        </p>
+        {!isSuccess && (
+          <>
+            <div className="bg-surface border border-border rounded-xl p-4 text-sm mb-5">
+              <p className="font-medium text-fg mb-2">How to get your data</p>
+              <ol className="list-decimal list-inside space-y-1.5 text-xs text-text-secondary leading-relaxed">
+                <li>
+                  Open{" "}
+                  <a
+                    href="https://www.linkedin.com/mypreferences/d/download-my-data"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-accent hover:underline"
+                  >
+                    linkedin.com/mypreferences/d/download-my-data
+                  </a>
+                </li>
+                <li>
+                  Request your data (either the basic or larger archive works)
+                </li>
+                <li>
+                  Download the .zip when LinkedIn emails you (can take minutes to
+                  72h)
+                </li>
+                <li>Upload the .zip here or later from your Profile</li>
+              </ol>
+            </div>
+
+            <label className="flex flex-col items-center justify-center w-full h-20 border border-dashed border-border rounded-xl cursor-pointer hover:border-text-secondary transition-colors mb-4">
+              {uploading ? (
+                <div className="flex items-center gap-2 text-text-secondary">
+                  <div className="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+                  <span className="text-sm">Processing...</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-text-secondary">
+                  <Upload size={16} />
+                  <span className="text-sm">Upload LinkedIn ZIP</span>
+                </div>
+              )}
+              <input
+                type="file"
+                accept=".zip,application/zip,application/x-zip-compressed"
+                onChange={handleUpload}
+                disabled={uploading || !userId}
+                className="hidden"
+              />
+            </label>
+
+            <p className="text-xs text-text-secondary text-center mb-5">
+              Don&apos;t have the file yet? No problem — you can upload it later
+              from your Profile.
+            </p>
+          </>
+        )}
 
         <button
-          onClick={() => router.push("/")}
-          className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-accent text-bg rounded-full font-medium hover:bg-accent-hover transition-colors"
+          onClick={handleEnter}
+          disabled={entering}
+          className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-accent text-bg rounded-full font-medium hover:bg-accent-hover disabled:opacity-70 transition-colors"
         >
-          Enter the app
-          <ArrowRight size={16} />
+          {entering ? (
+            <>
+              <div className="w-4 h-4 border-2 border-bg border-t-transparent rounded-full animate-spin" />
+              Loading...
+            </>
+          ) : (
+            <>
+              Enter the app
+              <ArrowRight size={16} />
+            </>
+          )}
         </button>
       </div>
     </div>
   );
 }
-

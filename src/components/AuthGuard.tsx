@@ -9,13 +9,17 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        router.replace("/login");
-      } else {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
         setReady(true);
+      } else {
+        router.replace("/login");
       }
     });
+
+    return () => subscription.unsubscribe();
   }, [router]);
 
   if (!ready) {

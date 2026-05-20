@@ -22,17 +22,21 @@ function ConnectLinkedInContent() {
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        setUserId(session.user.id);
+      } else {
         router.replace("/login");
-        return;
       }
-      setUserId(session.user.id);
     });
 
     if (searchParams.get("linkedin") === "connected") {
       setConnected(true);
     }
+
+    return () => subscription.unsubscribe();
   }, [router, searchParams]);
 
   function handleConnect() {
