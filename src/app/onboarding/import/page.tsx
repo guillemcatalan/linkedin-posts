@@ -23,14 +23,11 @@ function ImportDataContent() {
   const linkedinConnected = searchParams.get("linkedin") === "connected";
 
   useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         setUserId(session.user.id);
       }
     });
-    return () => subscription.unsubscribe();
   }, []);
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
