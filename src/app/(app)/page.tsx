@@ -18,17 +18,22 @@ export default function FeedPage() {
 
   useEffect(() => {
     async function load() {
-      const { data } = await supabase
-        .from("generated_posts")
-        .select(
-          "id, variant_1, published_at, users(name, department), post_engagement(likes, comments, views)"
-        )
-        .eq("status", "published")
-        .order("published_at", { ascending: false })
-        .limit(20);
+      try {
+        const { data } = await supabase
+          .from("generated_posts")
+          .select(
+            "id, variant_1, published_at, users(name, department), post_engagement(likes, comments, views)"
+          )
+          .eq("status", "published")
+          .order("published_at", { ascending: false })
+          .limit(20);
 
-      if (data) setPosts(data as unknown as FeedPost[]);
-      setLoading(false);
+        if (data) setPosts(data as unknown as FeedPost[]);
+      } catch {
+        // Query failed, show empty state
+      } finally {
+        setLoading(false);
+      }
     }
     load();
   }, []);
@@ -45,6 +50,16 @@ export default function FeedPage() {
       {loading ? (
         <div className="flex justify-center py-20">
           <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+        </div>
+      ) : posts.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <p className="text-text-secondary mb-4">No published posts yet.</p>
+          <a
+            href="create"
+            className="px-6 py-3 bg-accent text-white rounded-full font-medium hover:bg-accent-hover transition-all duration-150 ease-out"
+          >
+            Create your first post
+          </a>
         </div>
       ) : (
         <div className="space-y-4">

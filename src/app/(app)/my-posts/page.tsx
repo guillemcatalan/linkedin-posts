@@ -23,14 +23,19 @@ export default function MyPostsPage() {
   useEffect(() => {
     if (!user) return;
     async function load() {
-      const { data } = await supabase
-        .from("generated_posts")
-        .select("id, input_idea, variant_1, status, published_at, created_at, post_engagement(likes, comments, views)")
-        .eq("user_id", user!.id)
-        .order("created_at", { ascending: false });
+      try {
+        const { data } = await supabase
+          .from("generated_posts")
+          .select("id, input_idea, variant_1, status, published_at, created_at, post_engagement(likes, comments, views)")
+          .eq("user_id", user!.id)
+          .order("created_at", { ascending: false });
 
-      if (data) setPosts(data as unknown as MyPost[]);
-      setLoading(false);
+        if (data) setPosts(data as unknown as MyPost[]);
+      } catch {
+        // Query failed, show empty state
+      } finally {
+        setLoading(false);
+      }
     }
     load();
   }, [user]);
